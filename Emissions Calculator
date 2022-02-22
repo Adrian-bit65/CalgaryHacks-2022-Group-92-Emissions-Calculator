@@ -1,0 +1,232 @@
+"""
+Calgary Hacks 2022 Project
+Feb. 19, 2022 - Feb.20, 2022
+
+Developers:
+1) Ryan Loi
+2) Michelle Loi
+3) Adrian Llonor
+4) Michelle Cheung
+"""
+
+"""
+The CO2 emissions for each vehicle type in g/km
+https://www.carbonindependent.org/20.html#:~:text=Some%20key%20points%20are%3A,buses%20is%20822%20g%20%2F%20km
+https://www.thrustcarbon.com/insights/how-to-calculate-motorbike-co2-emissions#:~:text=If%20you%20travel%20100%20km,be%2012.8kg%20of%20CO2e.
+"""
+SEDAN = 240
+VAN = 260
+TRUCK = 302
+SUV = 258
+HYBRID = 80
+MOTORCYCLE = 113
+ELECTRIC = 0
+BUS = 82 # 822/10 from 822 g/km and assuming 10 people on the bus on average
+WALK = 0
+BICYCLE = 0
+
+#data entry list for TKINTER windows: [Emissions of Car per KM, Car Make, Start Point, End Point, Total Emissions Generated]
+DATA_LIST = []
+
+#Distance data
+DISTANCE_DATA = None
+
+from tkinter import *
+from tkinter import messagebox
+
+
+def enterTransport():
+
+    # Creating the window and a list containing the different options to select
+    transportWindow = Tk()
+    transportWindow.geometry("600x600")
+    transportWindow.configure(bg="#14213D")
+    OPTIONS = ["Sedan", "Van", "Truck", "SUV", "Hybrid", "Motorcycle", "Electric", "Bus", "Walking", "Bicycle"]
+
+    # Making the window
+    variable = StringVar(transportWindow)
+    variable.set(OPTIONS[0])
+
+    # Creation of welcoming text
+    welcomingText = Label(text="Please select your vehicle type:")
+    welcomingText.config(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    welcomingText.place(
+        relx=0.5,
+        rely=0.3,
+        anchor="center"
+
+    )
+
+
+    # Creation of the drop-down menu
+    dropDown = OptionMenu(transportWindow, variable, *OPTIONS)
+    dropDown.configure(width=20, bg="#14213D", fg="#fca311", font=("Helvetica", 15))
+    dropDown["menu"].config(bg="#14213D", fg="#fca311", font=("Helvetica", 15))
+    dropDown.place(
+        relx=0.5,
+        rely=0.4,
+        anchor="center"
+    )
+
+    # Returning the variable chosen
+    def selectVehicle():
+        if variable.get() == "Sedan":
+            selectedVehicle = SEDAN
+        elif variable.get() == "Van":
+            selectedVehicle = VAN
+        elif variable.get() == "Truck":
+            selectedVehicle = TRUCK
+        elif variable.get() == "SUV":
+            selectedVehicle = SUV
+        elif variable.get() == "Hybrid":
+            selectedVehicle = HYBRID
+        elif variable.get() == "Motorcycle":
+            selectedVehicle = MOTORCYCLE
+        elif variable.get() == "Electric":
+            selectedVehicle = ELECTRIC
+        elif variable.get() == "Bus":
+            selectedVehicle = BUS
+        elif variable.get() == "Walking":
+            selectedVehicle = WALK
+        elif variable.get() == "Bicycle":
+            selectedVehicle = BICYCLE
+        global DATA_LIST
+        DATA_LIST.append(selectedVehicle)
+        DATA_LIST.append(variable.get())
+        transportWindow.destroy()
+
+    button = Button(transportWindow, text="OK", command=selectVehicle, bg="#14213D", fg="#fca311",
+                    font=("Helvetica", 15))
+    button.place(
+        relx=0.5,
+        rely=0.5,
+        anchor="center"
+    )
+
+    transportWindow.mainloop()
+
+
+
+
+def calc_emissions():
+    index = len(DATA_LIST) - 4
+    transport_type = DATA_LIST[index]
+    emissions = transport_type * DISTANCE_DATA
+    return (str(f"{emissions:,.2f} g of CO2"))
+
+# distance obtaining window
+def distance():
+
+    def button_command():
+        try:
+            float(distance.get())
+            if distance.get() and startEntry.get() and endEntry.get() != '':
+                distance_data = distance.get()
+                global DISTANCE_DATA
+                DISTANCE_DATA= float(distance_data)
+                DATA_LIST.append(startEntry.get())
+                DATA_LIST.append(endEntry.get())
+                root.destroy()
+                return DATA_LIST
+            else:
+                messagebox.showwarning("Missing Field", "Please make an entry for all fields.")
+        except:
+            messagebox.showwarning("Invalid Input", "Please enter a number for travel distance.")
+
+
+
+    root = Tk()
+    root.geometry("600x600")
+    root.configure(bg="#14213D")
+
+    # Creation of instructions
+    startingPoint = Label(text="What is your starting point?")
+    startingPoint.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    startEntry = Entry(root, width=50)
+
+    endDestination = Label(text="What is your end destination?")
+    endDestination.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    endEntry = Entry(root, width=50)
+
+    instructions = Label(text="Please enter the travel distance in KM: ")
+    instructions.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    distance = Entry(root, width=50)
+
+    startingPoint.place(relx=0.5, rely=0.2, anchor="center")
+    startEntry.place(relx=0.5, rely=0.3, anchor="center")
+    endDestination.place(relx=0.5, rely=0.4, anchor="center")
+    endEntry.place(relx=0.5, rely=0.5, anchor="center")
+    instructions.place(relx=0.5, rely=0.6, anchor="center")
+    distance.place(relx=0.5, rely=0.7, anchor="center")
+
+    Button(root, text="Enter", command=button_command, bg="#14213D", fg="#fca311",
+           font=("Helvetica", 15)).place(relx=0.5, rely=0.8, anchor="center")
+    root.mainloop()
+
+
+
+def summary_window(transport_type, location_start, destination, CO2_emissions):
+    root = Tk()
+    root.geometry("600x600")
+    root.configure(bg="#14213D")
+
+    #Create Title for Page
+    summary = Label(root, text = f"Summary")
+    summary.configure(font=("Helvetica", 30), bg="#14213D", fg="#fca311")
+    summary.pack()
+    # Create label in summary window for transportation type
+    transport = Label(root, text=f"The transport you used was: {transport_type}")
+
+    transport.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    transport.pack()
+
+    # Create label in summary window to tell starting location.
+    location = Label(root, text=f"Your starting location: {location_start}")
+    location.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    location.pack()
+
+    # Create label in summary window to present destination.
+    destination = Label(root, text=f"Your destination: {destination}")
+    destination.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    destination.pack()
+
+    # Create label in summary window for the CO2 emissions.
+    CO2 = Label(root, text=f"\nTotal carbon dioxide emissions from current transportation "
+                           f"\npath and transportation method: {CO2_emissions}")
+    CO2.configure(font=("Helvetica", 15), bg="#14213D", fg="#fca311")
+    CO2.pack()
+
+
+
+    #Create button to ask if user wants to calculate another path
+    def recalc_command():
+        root.destroy()
+        main()
+    def exit_command():
+        root.destroy()
+
+    Button(root, text="Calculate a different path", command=recalc_command).pack()
+    Button(root, text = "Exit", command = exit_command).pack()
+    root.mainloop()
+
+def setupVariables():
+    dataLength = len(DATA_LIST)
+    carType = DATA_LIST[dataLength-3]
+    startPoint = DATA_LIST[dataLength-2]
+    endPoint = DATA_LIST[dataLength-1]
+    return carType, startPoint, endPoint
+
+
+#Main function
+def main():
+
+
+    # creating the gui to get user input
+    enterTransport()
+    distance()
+    emissions = calc_emissions()
+    carType, startPoint, endPoint = setupVariables()
+    summary_window(carType, startPoint, endPoint, emissions)
+
+
+main()
